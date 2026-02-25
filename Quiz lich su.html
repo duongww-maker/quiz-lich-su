@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hào Khí Việt Nam - Quiz Lịch Sử</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Tối ưu hóa cho việc nhúng vào bài báo */
+        body {
+            font-family: 'Lexend', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: transparent; /* Để nền trong suốt, hòa hợp với trang web chính */
+        }
+        .quiz-embed-container {
+            max-width: 700px;
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+        .btn-option {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-option:active {
+            transform: scale(0.98);
+        }
+        .progress-bar {
+            transition: width 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="p-2">
+
+    <div id="game-container" class="quiz-embed-container">
+        <!-- Start Screen -->
+        <div id="start-screen" class="glass-card rounded-2xl p-6 text-center animate-fade-in">
+            <div class="mb-4 inline-block p-3 bg-red-50 rounded-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900 mb-2">Hào Khí Việt Nam</h1>
+            <p class="text-sm text-gray-500 mb-6">Trắc nghiệm kiến thức lịch sử dành cho bạn đọc.</p>
+            <button onclick="startGame()" class="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-lg transition-all shadow-md">
+                Bắt Đầu
+            </button>
+        </div>
+
+        <!-- Quiz Screen -->
+        <div id="quiz-screen" class="hidden glass-card rounded-2xl p-6 animate-fade-in">
+            <div class="flex justify-between items-center mb-4">
+                <span id="question-count" class="text-xs font-bold text-red-600 uppercase">Câu 1/10</span>
+                <span id="score-display" class="text-xs font-bold text-gray-500">Điểm: 0</span>
+            </div>
+            
+            <div class="w-full bg-gray-100 h-1.5 rounded-full mb-6 overflow-hidden">
+                <div id="progress" class="progress-bar bg-red-500 h-full w-0"></div>
+            </div>
+
+            <h2 id="question-text" class="text-xl font-bold text-gray-800 mb-6 leading-snug">...</h2>
+
+            <div id="options-container" class="grid grid-cols-1 gap-3">
+                <!-- Options injected here -->
+            </div>
+        </div>
+
+        <!-- Result Screen -->
+        <div id="result-screen" class="hidden glass-card rounded-2xl p-8 text-center animate-fade-in">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Kết quả của bạn</h2>
+            <div id="final-score-circle" class="my-6 w-24 h-24 bg-red-600 text-white rounded-full flex items-center justify-center text-3xl font-bold mx-auto border-4 border-red-50 shadow-lg">
+                0/10
+            </div>
+            <p id="result-message" class="text-sm text-gray-600 mb-6 px-2"></p>
+            <div class="flex gap-3">
+                <button onclick="startGame()" class="flex-1 py-3 bg-red-600 text-white font-bold rounded-xl text-sm transition-all shadow-sm">
+                    Chơi Lại
+                </button>
+                <button onclick="showStartScreen()" class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl text-sm transition-all border border-gray-200">
+                    Trang Chủ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            { question: "Vị vua nào đã đặt tên nước ta là Đại Cồ Việt?", options: ["Ngô Quyền", "Đinh Tiên Hoàng", "Lê Đại Hành", "Lý Thái Tổ"], correct: 1 },
+            { question: "Trận chiến trên sông Bạch Đằng năm 938 do ai lãnh đạo?", options: ["Trần Hưng Đạo", "Lê Lợi", "Ngô Quyền", "Quang Trung"], correct: 2 },
+            { question: "Ai là tác giả của bản 'Bình Ngô Đại Cáo'?", options: ["Nguyễn Trãi", "Trần Hưng Đạo", "Lê Thánh Tông", "Chu Văn An"], correct: 0 },
+            { question: "Chiến dịch Điện Biên Phủ kết thúc vào năm nào?", options: ["1945", "1954", "1968", "1975"], correct: 1 },
+            { question: "Vị vua cuối cùng của Việt Nam là ai?", options: ["Khải Định", "Duy Tân", "Hàm Nghi", "Bảo Đại"], correct: 3 },
+            { question: "Ai được mệnh danh là 'Vạn Thắng Vương'?", options: ["Đinh Bộ Lĩnh", "Lê Hoàn", "Lý Thường Kiệt", "Trần Quang Khải"], correct: 0 },
+            { question: "Vị anh hùng nào cưỡi voi và nói: 'Tôi muốn cưỡi cơn gió mạnh'?", options: ["Hai Bà Trưng", "Bà Triệu", "Thái hậu Dương Vân Nga", "Bùi Thị Xuân"], correct: 1 },
+            { question: "Triều đại nào dài nhất trong lịch sử Việt Nam?", options: ["Nhà Lý", "Nhà Trần", "Nhà Lê", "Nhà Nguyễn"], correct: 2 },
+            { question: "Năm 1010, Lý Thái Tổ dời đô từ Hoa Lư về đâu?", options: ["Huế", "Thăng Long", "Cổ Loa", "Phú Xuân"], correct: 1 },
+            { question: "Cuộc khởi nghĩa Lam Sơn kéo dài bao nhiêu năm?", options: ["5 năm", "10 năm", "15 năm", "20 năm"], correct: 1 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let canAnswer = true;
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCount = document.getElementById('question-count');
+        const scoreDisplay = document.getElementById('score-display');
+        const progressBar = document.getElementById('progress');
+
+        function showStartScreen() {
+            startScreen.classList.remove('hidden');
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+        }
+
+        function startGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            resultScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            updateScore();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            canAnswer = true;
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionCount.innerText = `Câu ${currentQuestionIndex + 1}/${quizData.length}`;
+            questionText.innerText = currentQuestion.question;
+            progressBar.style.width = `${((currentQuestionIndex) / quizData.length) * 100}%`;
+            
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.innerText = option;
+                button.className = 'btn-option w-full p-4 text-left border-2 border-gray-100 rounded-xl hover:border-red-300 hover:bg-red-50 font-medium text-gray-700 flex items-center justify-between text-sm';
+                button.onclick = () => handleAnswer(index, button);
+                const dot = document.createElement('div');
+                dot.className = 'w-4 h-4 rounded-full border border-gray-300';
+                button.appendChild(dot);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function handleAnswer(selectedIndex, button) {
+            if (!canAnswer) return;
+            canAnswer = false;
+            const correctIndex = quizData[currentQuestionIndex].correct;
+            const buttons = optionsContainer.querySelectorAll('button');
+
+            if (selectedIndex === correctIndex) {
+                score++;
+                button.classList.add('bg-green-50', 'border-green-500', 'text-green-800');
+            } else {
+                button.classList.add('bg-red-50', 'border-red-500', 'text-red-800');
+                buttons[correctIndex].classList.add('bg-green-50', 'border-green-200');
+            }
+            updateScore();
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizData.length) showQuestion();
+                else showResult();
+            }, 1000);
+        }
+
+        function updateScore() {
+            scoreDisplay.innerText = `Điểm: ${score * 10}`;
+        }
+
+        function showResult() {
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            document.getElementById('final-score-circle').innerText = `${score}/${quizData.length}`;
+            const message = document.getElementById('result-message');
+            if (score === quizData.length) message.innerText = "Tuyệt vời! Bạn là một chuyên gia lịch sử.";
+            else if (score >= 7) message.innerText = "Rất tốt! Bạn nắm rất vững sử Việt.";
+            else if (score >= 5) message.innerText = "Tạm ổn! Hãy tìm hiểu thêm nhé.";
+            else message.innerText = "Lịch sử nước ta rất thú vị, hãy cùng đọc thêm!";
+        }
+    </script>
+</body>
+</html>
